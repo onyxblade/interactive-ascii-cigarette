@@ -1,0 +1,152 @@
+<p>
+The package reads:
+Completely harmless, no damage to the environment or anyone, set aside a little power consumption.
+</p>
+<p>
+Press "Pull" and hold to take a pull. "Replace" to start a new one.
+</p>
+
+
+<pre id="target"></pre>
+
+<button id="pull">Pull</button>
+<button id="replace">Replace</button>
+<style>
+body {
+  background: black;
+  color: #ccc;
+}
+pre {
+  line-height: 1;
+}
+</style>
+
+<script>
+function makeCigarette(target, pull, replace) {
+  let lightPosition = 14
+  let frames = 0
+  let burningRate = 1
+  let pulling = false
+
+  function axisString(row, col) {
+    return `c-${row}-${col}`
+  }
+
+  function findCell(row, col) {
+    return target.querySelector(`.${axisString(row, col)}`)
+  }
+
+  function initializeCigarette() {
+    const html = Array(4).fill().map((_, row) => {
+      return Array(21).fill().map((_, col) => `<span class="${axisString(row, col)}"> </span>`).join('')
+    }).join('\n')
+    lightPosition = 14
+    frames = 0
+    target.innerHTML = html
+    findCell(2, 1).innerHTML = '_'
+    findCell(3, 0).innerHTML = '['
+    findCell(3, 1).innerHTML = '_'
+    findCell(3, 2).innerHTML = '['
+    findCell(3, 18).innerHTML = 'j'
+    findCell(3, 19).innerHTML = 'g'
+    findCell(3, 20).innerHTML = 's'
+    paintTrunk(11)
+    paintLight(11 + 3)
+    paintSmoke(11 + 3)
+  }
+
+  function paintLight(position) {
+    findCell(3, lightPosition).innerHTML = '<span class="light">#</span>'
+    target.querySelector('.light').style.transition = 'color, 1s'
+    updateLightColor()
+  }
+
+  function paintTrunk(length) {
+    for (let col = 3; col < 3 + length; col++) {
+      findCell(2, col).innerHTML = '_'
+      findCell(3, col).innerHTML = '_'
+    }
+  }
+
+  function paintSmoke(position) {
+    const delays = [200, 400, 600]
+    let smoke = []
+    if (Math.random() >= 0.3) {
+      smoke = [
+        [2, position + 1, ')'],
+        [1, position - 1, '('],
+        [0, position, ')']
+      ]
+    } else {
+      smoke = [
+        [2, position + 1, ')'],
+        [1, position, '('],
+        [0, position + 2, ')']
+      ]
+    }
+    smoke.map(([row, col, char], index) => {
+      setTimeout(() => {
+        findCell(row, col).innerHTML = char
+      }, delays[index])
+    })
+  }
+
+  function removeSmoke(position) {
+    findCell(2, position + 1).innerHTML = ' '
+    findCell(1, position - 1).innerHTML = ' '
+    findCell(0, position).innerHTML = ' '
+    findCell(1, position).innerHTML = ' '
+    findCell(0, position + 2).innerHTML = ' '
+  }
+
+  function consume() {
+    if (lightPosition == 3) {
+      removeSmoke(lightPosition)
+      findCell(3, lightPosition).innerHTML = ' '
+    } else {
+      findCell(3, lightPosition).innerHTML = ' '
+      removeSmoke(lightPosition)
+      lightPosition -= 1
+      findCell(3, lightPosition).innerHTML = ' '
+      findCell(2, lightPosition).innerHTML = ' '
+      paintLight()
+      paintSmoke(lightPosition)
+    }
+  }
+
+  initializeCigarette()
+  function animationFrame() {
+    frames += burningRate
+    if (frames > 900) {
+      consume()
+      frames = 0
+    }
+    requestAnimationFrame(animationFrame)
+  }
+  animationFrame()
+
+  function updateLightColor() {
+    if (pulling) {
+      target.querySelector('.light').style.color = '#FF2400'
+    } else {
+      target.querySelector('.light').style.color = '#CE2029'
+    }
+  }
+
+  function endPulling() {
+    pulling = false
+    updateLightColor()
+    burningRate = 1
+  }
+
+  replace.addEventListener('click', () => initializeCigarette())
+  pull.addEventListener('mousedown', (e) => {
+    pulling = true
+    updateLightColor()
+    burningRate = 3
+  })
+  pull.addEventListener('mouseup', endPulling)
+  pull.addEventListener('mouseout', endPulling)
+}
+makeCigarette(document.querySelector('#target'), document.querySelector('#pull'), document.querySelector('#replace'))
+</script>
