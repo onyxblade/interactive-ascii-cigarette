@@ -1,3 +1,7 @@
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</head>
+
 <p>
 The package reads:
 Completely harmless, no damage to the environment or anyone, set aside a little power consumption.
@@ -147,6 +151,7 @@ function makeCigarette(target, pull, replace) {
   })
   pull.addEventListener('mouseup', endPulling)
   pull.addEventListener('mouseout', endPulling)
+  pull.style.userSelect = 'none'
 }
 makeCigarette(document.querySelector('#target'), document.querySelector('#pull'), document.querySelector('#replace'))
 </script>
